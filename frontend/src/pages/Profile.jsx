@@ -1,6 +1,11 @@
+import { useEffect } from "react";
 import MyOrdersPage from "./MyOrdersPage";
 
 const Profile = () => {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow container mx-auto p-4 md:p-6">

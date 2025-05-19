@@ -5,6 +5,7 @@ import streamifier from "streamifier"
 import dotenv from "dotenv";
 
 dotenv.config()
+const router = express.Router();
 
 // Cloudiary configuration
 cloudinary.config({
@@ -17,7 +18,6 @@ cloudinary.config({
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const router = express.Router();
 
 router.post("/", upload.single("image"), async (req, res) => {
     try {
@@ -26,7 +26,8 @@ router.post("/", upload.single("image"), async (req, res) => {
             return res.status(400).json({ message: "No file uploaded" });
         }
 
-        // Upload image to Cloudinary
+        //* Upload image to Cloudinary
+
         const streamUpload = (fileBuffer) => {
             return new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream((error, result) => {

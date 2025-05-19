@@ -250,11 +250,9 @@ export const getSingleProduct = async (req, res) => {
 }
 
 export const getSimilarProducts = async (req, res) => {
-
     const { id } = req.params
 
     try {
-
         const product = await Product.findById(id);
 
         if (!product) {
@@ -264,26 +262,49 @@ export const getSimilarProducts = async (req, res) => {
             });
         }
 
-        const similarProducts = await Product.find({
+        // First try to find products with same category and gender
+        let similarProducts = await Product.find({
             _id: { $ne: id },
             category: new RegExp('^' + product.category + '$', 'i'),
             gender: new RegExp('^' + product.gender + '$', 'i'),
         }).limit(4);
 
+        // If we don't have 4 products, add more from the same category regardless of gender
+        if (similarProducts.length < 4) {
+            const additionalProducts = await Product.find({
+                _id: { $ne: id },
+                category: new RegExp('^' + product.category + '$', 'i'),
+                _id: { $nin: similarProducts.map(p => p._id) }
+            }).limit(4 - similarProducts.length);
+
+            similarProducts = [...similarProducts, ...additionalProducts];
+        }
+
+        // If we still don't have 4 products, add random products
+        if (similarProducts.length < 4) {
+            const randomProducts = await Product.find({
+                _id: { $ne: id },
+                _id: { $nin: similarProducts.map(p => p._id) }
+            }).limit(4 - similarProducts.length);
+
+            similarProducts = [...similarProducts, ...randomProducts];
+        }
+
+        // Ensure we only return exactly 4 products (or fewer if not enough in database)
+        if (similarProducts.length > 4) {
+            similarProducts = similarProducts.slice(0, 4);
+        }
 
         res.status(200).json({
             success: true,
             message: "Similar products fetched successfully",
             similarProducts,
         });
-
     } catch (error) {
-
         res.status(500).json({
             success: false,
             message: "Server error: " + error.message,
         });
-
     }
 }
 
@@ -291,7 +312,7 @@ export const bestSellerProducts = async (req, res) => {
     try {
         const bestSellers = await Product.find()
             .sort({ rating: -1 })
-            .limit(5);
+            .limit(4);
 
         if (!bestSellers || bestSellers.length === 0) {
             return res.status(404).json({
@@ -325,14 +346,14 @@ export const newArrivals = async (req, res) => {
             message: "New arrivals fetched successfully",
             products,
         });
-        
+
     } catch (error) {
 
         res.status(500).json({
             success: false,
             message: "Server error: " + error.message,
         });
-        
+
     }
-    
+
 }

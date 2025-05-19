@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 
 const NewArrivals = () => {
   const scrollRef = useRef(null);
@@ -9,97 +10,34 @@ const NewArrivals = () => {
   const [scrollLeft, setScrollLeft] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [newArrivals, setNewArrivals] = useState([]);
 
-  const newArrivals = [
-    {
-      _id: 1,
-      name: "Stylish Jacket",
-      price: 120,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=1",
-          altText: "Stylish Jacket",
-        },
-      ],
-    },
-    {
-      _id: 2,
-      name: "Comfy Hoodie",
-      price: 95,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=2",
-          altText: "Comfy Hoodie",
-        },
-      ],
-    },
-    {
-      _id: 3,
-      name: "Trendy Sneakers",
-      price: 140,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=3",
-          altText: "Trendy Sneakers",
-        },
-      ],
-    },
-    {
-      _id: 4,
-      name: "Vintage Sunglasses",
-      price: 60,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=4",
-          altText: "Vintage Sunglasses",
-        },
-      ],
-    },
-    {
-      _id: 5,
-      name: "Denim Jeans",
-      price: 80,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=5",
-          altText: "Denim Jeans",
-        },
-      ],
-    },
-    {
-      _id: 6,
-      name: "Leather Boots",
-      price: 150,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=6",
-          altText: "Leather Boots",
-        },
-      ],
-    },
-    {
-      _id: 7,
-      name: "Chic Handbag",
-      price: 110,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=7",
-          altText: "Chic Handbag",
-        },
-      ],
-    },
-    {
-      _id: 8,
-      name: "Casual T-Shirt",
-      price: 45,
-      images: [
-        {
-          url: "https://picsum.photos/800/800.webp?random=8",
-          altText: "Casual T-Shirt",
-        },
-      ],
-    },
-  ];
+  useEffect(() => {
+  const fetchNewArrivals = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/products/new-arrivals`
+      );
+
+      let data;
+      if (Array.isArray(response.data)) {
+        data = response.data;
+      } else if (response.data && response.data.products) {
+        data = response.data.products;
+      } else if (response.data && response.data.newArrivals) {
+        data = response.data.newArrivals;
+      } else {
+        data = [];
+      }
+
+      setNewArrivals(data);
+    } catch (error) {
+      console.error("Error fetching new arrivals:", error);
+    }
+  };
+  fetchNewArrivals();
+}, []);
+
 
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -148,7 +86,7 @@ const NewArrivals = () => {
         container.removeEventListener("scroll", updateScrollButtons);
       };
     }
-  }, []);
+  }, [newArrivals]);
 
   return (
     <section className="py-16 px-4 lg:px-0">
@@ -212,9 +150,9 @@ const NewArrivals = () => {
                 draggable="false"
               />
               <div className="bg-black/50 text-white px-4 py-3 absolute bottom-0 w-full backdrop-blur-sm">
-                <Link to={`/products/${product._id}`}>
+                <Link to={`/product/${product._id}`}>
                   <h4 className="font-semibold">{product.name}</h4>
-                  <p className="text-sm">${product.price}</p>
+                  <p className="text-sm">₹{product.price}</p>
                 </Link>
               </div>
             </div>
