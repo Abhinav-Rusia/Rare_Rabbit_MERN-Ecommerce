@@ -5,10 +5,15 @@ import SearchBar from "../Common/SearchBar";
 import CartDrawer from "./CartDrawer";
 import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
+  const { cart } = useSelector((state) => state.cart);
+
+  const cartItemCount =
+    cart?.products?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   const toggleNavDrawer = () => {
     setNavDrawerOpen(!navDrawerOpen);
@@ -43,25 +48,25 @@ const Navbar = () => {
           </Link>
 
           <Link
-            to="#"
+            to="/collections/all?gender=male"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             MEN
           </Link>
           <Link
-            to="#"
+            to="/collections/all?gender=female"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Women
           </Link>
           <Link
-            to="#"
+            to="/collections/all?gender=kids"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Kids
           </Link>
           <Link
-            to="#"
+            to="/collections/all?category=Accessories"
             className="text-gray-700 hover:text-black text-sm font-medium uppercase"
           >
             Accessories
@@ -79,16 +84,18 @@ const Navbar = () => {
             Admin{" "}
           </Link>
           <Link to="/profile" className="hover:text-black">
-            <HiOutlineUser className="h-6 w-6" />
+            <HiOutlineUser className="h-6 w-6 text-gray-700" />
           </Link>
           <button
             onClick={toggleCartDrawer}
             className="relative cursor-pointer hover:text-black"
           >
             <HiOutlineShoppingBag className="h-6 w-6 text-gray-700" />
-            <span className="absolute -bottom-1 -right-2.5 bg-red-500 text-xs text-white px-2 py-0.5 rounded-full">
-              4
-            </span>
+            {cartItemCount > 0 && (
+              <span className="absolute -bottom-1 -right-2.5 bg-red-500 text-xs text-white px-2 py-0.5 rounded-full">
+                {cartItemCount}
+              </span>
+            )}
           </button>
           {/* <SearchBar /> */}
           <div className="overflow-hidden">
@@ -124,28 +131,28 @@ const Navbar = () => {
             </Link>
 
             <Link
-              to="#"
+              to="/collections/all?gender=male"
               onClick={toggleNavDrawer}
               className="block py-2 text-gray-700 hover:text-black"
             >
               MEN
             </Link>
             <Link
-              to="#"
+              to="/collections/all?gender=female"
               onClick={toggleNavDrawer}
               className="block py-2 text-gray-700 hover:text-black"
             >
               WOMEN
             </Link>
             <Link
-              to="#"
+              to="/collections/all?gender=kids"
               onClick={toggleNavDrawer}
               className="block py-2 text-gray-700 hover:text-black"
             >
               KIDS
             </Link>
             <Link
-              to="#"
+              to="/collections/all?category=Accessories"
               onClick={toggleNavDrawer}
               className="block py-2 text-gray-700 hover:text-black"
             >

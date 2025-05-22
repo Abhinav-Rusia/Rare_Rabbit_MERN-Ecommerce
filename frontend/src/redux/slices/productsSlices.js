@@ -34,7 +34,12 @@ export const fetchProductsByFilters = createAsyncThunk(
     if (sortBy) query.append("sortBy", sortBy);
     if (search) query.append("search", search);
     if (category) query.append("category", category);
-    if (limit) query.append("limit", limit);
+    // Only add limit parameter if it's defined and not null or undefined
+    // Only add limit parameter if it's explicitly provided and is a positive number
+    if (limit !== undefined && limit !== null && limit !== '' && Number(limit) > 0) {
+      console.log(`Adding limit parameter: ${limit}`);
+      query.append("limit", limit);
+    }
 
     const response = await axios.get(
       `${import.meta.env.VITE_BACKEND_URL}/api/products?${query.toString()}`
@@ -134,11 +139,27 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductsByFilters.fulfilled, (state, action) => {
         state.loading = false;
+
+        console.log("API Response:", action.payload);
+
         // Check if the response has the expected structure and extract products
         if (action.payload && action.payload.products) {
-          state.products = action.payload.products;
+          // Handle the case where products might be an array of documents from MongoDB aggregation
+          const products = action.payload.products.map(product => {
+            // If the product has _id as an object with id property (from aggregation), convert it
+            if (product._id && typeof product._id === 'object' && product._id.id) {
+              return { ...product, _id: product._id.id };
+            }
+            return product;
+          });
+
+          console.log(`Loaded ${products.length} products`);
+          state.products = products;
         } else {
-          state.products = Array.isArray(action.payload) ? action.payload : [];
+          // Fallback for unexpected response format
+          const fallbackProducts = Array.isArray(action.payload) ? action.payload : [];
+          console.log(`Loaded ${fallbackProducts.length} products (fallback)`);
+          state.products = fallbackProducts;
         }
       })
       .addCase(fetchProductsByFilters.rejected, (state, action) => {

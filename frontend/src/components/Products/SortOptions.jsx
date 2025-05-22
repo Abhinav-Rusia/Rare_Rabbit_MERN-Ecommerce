@@ -6,9 +6,17 @@ const SortOptions = () => {
 
   const handleSortChange = (e) => {
     const sortBy = e.target.value;
-    searchParams.set("sortBy", sortBy);
-    setSearchParams(searchParams);
 
+    // Create a new URLSearchParams object to preserve existing parameters
+    const newParams = new URLSearchParams(searchParams);
+
+    // Set the sortBy parameter
+    newParams.set("sortBy", sortBy);
+
+    // Update the URL with the new parameters
+    setSearchParams(newParams);
+
+    console.log("Sorting by:", sortBy);
   };
 
   return (

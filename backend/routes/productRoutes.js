@@ -8,6 +8,7 @@ import {
   getSimilarProducts,
   bestSellerProducts,
   newArrivals,
+  getProductMetadata,
 } from "../controller/product.controller.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { isAdmin } from "../middleware/isAdmin.js";
@@ -22,6 +23,7 @@ router.delete("/:id", verifyToken, isAdmin, deleteProduct);
 // ✅ Public routes (ordered properly!)
 router.get("/best-sellers", bestSellerProducts);
 router.get("/new-arrivals", newArrivals);
+router.get("/metadata", getProductMetadata); // Get categories and genders for debugging
 router.get("/similar/:id", getSimilarProducts);
 router.get("/", getProducts);         // List all products (generic)
 router.get("/:id", getSingleProduct); // Must be last — catches dynamic :id

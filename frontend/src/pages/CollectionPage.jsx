@@ -3,11 +3,40 @@ import { FaFilter } from "react-icons/fa";
 import FilterSidebar from "../components/Products/FilterSidebar";
 import SortOptions from "../components/Products/SortOptions";
 import ProductGrid from "../components/Products/ProductGrid";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProductsByFilters } from "../redux/slices/productsSlices";
 
 const CollectionPage = () => {
-  const [products, setProducts] = useState([]);
+  const { collection } = useParams();
+  const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const { products, loading, error } = useSelector((state) => state.products);
+  const queryParams = Object.fromEntries([...searchParams]);
+
+  // const [products, setProducts] = useState([]);
   const sidebarRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    // Prepare parameters for API call
+    const params = { ...queryParams };
+
+    // Handle collection parameter - only include it if it's not "all"
+    if (collection && collection.toLowerCase() !== "all") {
+      params.collection = collection;
+    }
+
+    // For the "all" collection, we want to fetch all products without any limit
+    // This ensures we get all products in the database
+    delete params.limit;
+
+    // Dispatch the action to fetch products
+    dispatch(fetchProductsByFilters(params));
+
+    // Log the params for debugging
+    console.log("Fetching products with params:", params);
+  }, [dispatch, collection, searchParams]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -32,101 +61,6 @@ const CollectionPage = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const fetchedProducts = [
-        {
-          _id: 1,
-          name: "Women's Puffer Jacket",
-          price: 1349,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=11",
-              altText: "Black Women's Puffer Jacket",
-            },
-          ],
-        },
-        {
-          _id: 2,
-          name: "Women's Leather Jacket",
-          price: 2299,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=12",
-              altText: "Brown Women's Leather Jacket",
-            },
-          ],
-        },
-        {
-          _id: 3,
-          name: "Women's Oversized Hoodie",
-          price: 999,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=13",
-              altText: "Grey Women's Oversized Hoodie",
-            },
-          ],
-        },
-        {
-          _id: 4,
-          name: "Women's Denim Jacket",
-          price: 1899,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=14",
-              altText: "Blue Women's Denim Jacket",
-            },
-          ],
-        },
-        {
-          _id: 5,
-          name: "Women's Crop Top",
-          price: 699,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=15",
-              altText: "Black Women's Crop Top",
-            },
-          ],
-        },
-        {
-          _id: 6,
-          name: "Women's Blazer",
-          price: 1999,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=16",
-              altText: "Beige Women's Blazer",
-            },
-          ],
-        },
-        {
-          _id: 7,
-          name: "Women's Flannel Shirt",
-          price: 849,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=17",
-              altText: "Red Checked Women's Flannel Shirt",
-            },
-          ],
-        },
-        {
-          _id: 8,
-          name: "Women's Knitted Sweater",
-          price: 1249,
-          images: [
-            {
-              url: "https://picsum.photos/800.webp?random=18",
-              altText: "Cream Women's Knitted Sweater",
-            },
-          ],
-        },
-      ];
-      setProducts(fetchedProducts);
-    }, 1000);
-  }, []);
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -143,20 +77,23 @@ const CollectionPage = () => {
         ref={sidebarRef}
         className={`${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed inset-y-0 z-50 left-0 w-64 bg-white overflow-y-auto transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0`}
+        } fixed inset-y-0 z-50 left-0 w-72 bg-white overflow-y-auto transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:w-64 lg:border-r border-gray-100`}
       >
         <FilterSidebar />
       </div>
       <div className="flex-grow p-4">
         <h2 className="text-2xl uppercase font-semibold mb-4">
-          All collection
+          {collection === "all" ? "All Collections" : collection}
+          <span className="text-sm font-normal text-gray-500 ml-2">
+            ({products.length} products)
+          </span>
         </h2>
 
         {/* Sort Option */}
         <SortOptions />
 
         {/* Product Grid */}
-        <ProductGrid products={products} />
+        <ProductGrid products={products} loading={loading} error={error} />
       </div>
     </div>
   );

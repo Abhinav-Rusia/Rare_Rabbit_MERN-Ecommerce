@@ -12,3 +12,18 @@
   font-family: "Coiny", cursive;
   font-weight: 600;
 }
+
+.animate-draw {
+  animation: draw 1.5s ease-in-out forwards;
+}
+
+@keyframes draw {
+  0% {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+  }
+  100% {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 0;
+  }
+}

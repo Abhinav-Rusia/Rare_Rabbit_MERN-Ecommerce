@@ -167,8 +167,8 @@ const cartSlice = createSlice({
       })
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
-        saveCartToStorage(action.payload);
+        state.cart = action.payload.cart; // Make sure we're accessing the cart property
+        saveCartToStorage(action.payload.cart);
       })
       .addCase(fetchCart.rejected, (state, action) => {
         state.loading = false;
@@ -180,8 +180,8 @@ const cartSlice = createSlice({
       })
       .addCase(addToCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
-        saveCartToStorage(action.payload);
+        state.cart = action.payload.cart; // Make sure we're accessing the cart property
+        saveCartToStorage(action.payload.cart);
       })
       .addCase(addToCart.rejected, (state, action) => {
         state.loading = false;
@@ -193,8 +193,8 @@ const cartSlice = createSlice({
       })
       .addCase(updateCartItemQuantity.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
-        saveCartToStorage(action.payload);
+        state.cart = action.payload.cart; // Make sure we're accessing the cart property
+        saveCartToStorage(action.payload.cart);
       })
       .addCase(updateCartItemQuantity.rejected, (state, action) => {
         state.loading = false;
@@ -207,8 +207,8 @@ const cartSlice = createSlice({
       })
       .addCase(removeFromCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
-        saveCartToStorage(action.payload);
+        state.cart = action.payload.cart; // Make sure we're accessing the cart property
+        saveCartToStorage(action.payload.cart);
       })
       .addCase(removeFromCart.rejected, (state, action) => {
         state.loading = false;
