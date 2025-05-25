@@ -36,15 +36,16 @@ export const registerUser = async (req, res) => {
 
         await user.save()
 
-        // JWT 
+        // JWT
 
-        generateTokenAndSetCookie(res, user._id)
+        const token = generateTokenAndSetCookie(res, user._id)
 
         await sendVerificationEmail(user.email, verificationToken)
 
         res.status(201).json({
             success: true,
             message: "User created successfully",
+            token: token,
             user: {
                 ...user.toObject(),
                 password: undefined
@@ -90,9 +91,13 @@ export const verifyEmail = async (req, res) => {
 
         await sendWelcomeEmail(user.email, user.name)
 
+        // Generate token for the user
+        const token = generateTokenAndSetCookie(res, user._id)
+
         res.status(200).json({
             success: true,
             message: "Email verified successfully",
+            token: token,
             user: {
                 ...user._doc,
                 password: undefined
@@ -144,7 +149,7 @@ export const login = async (req, res) => {
             })
         }
 
-        generateTokenAndSetCookie(res, user._id)
+        const token = generateTokenAndSetCookie(res, user._id)
 
         user.lastLogin = new Date()
 
@@ -153,6 +158,7 @@ export const login = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Logged in successfully",
+            token: token,
             user: {
                 ...user.toObject(),
                 password: undefined

@@ -34,7 +34,7 @@ const AdminLayout = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 md:translate-x-0 md:static z-30 bg-white/10 backdrop-blur-md border-r border-white/20 shadow-lg rounded-r-xl`}
       >
-        <AdminSidebar />
+        <AdminSidebar onLinkClick={toggleSidebar} />
       </div>
 
       {/* Main content */}

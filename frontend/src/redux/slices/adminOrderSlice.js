@@ -14,7 +14,10 @@ export const fetchAllOrders = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data || "An error occurred while fetching orders"
+        error.response?.data?.message ||
+        error.response?.data ||
+        error.message ||
+        "An error occurred while fetching orders"
       );
     }
   }
@@ -35,7 +38,10 @@ export const updateOrderStatus = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data || "An error occurred while updating order status"
+        error.response?.data?.message ||
+        error.response?.data ||
+        error.message ||
+        "An error occurred while updating order status"
       );
     }
   }
@@ -52,7 +58,10 @@ export const deleteOrder = createAsyncThunk(
       return id; // Return the deleted order ID for local state removal
     } catch (error) {
       return rejectWithValue(
-        error.response?.data || "An error occurred while deleting the order"
+        error.response?.data?.message ||
+        error.response?.data ||
+        error.message ||
+        "An error occurred while deleting the order"
       );
     }
   }
@@ -88,7 +97,9 @@ const adminOrderSlice = createSlice({
       })
       .addCase(fetchAllOrders.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = typeof action.payload === 'string'
+          ? action.payload
+          : action.payload?.message || action.payload?.error || "Failed to fetch orders";
       })
 
       // ✅ Update Order Status
@@ -98,16 +109,22 @@ const adminOrderSlice = createSlice({
       })
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.orders.findIndex(
-          (order) => order._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.orders[index] = action.payload;
+        // Handle different response formats
+        const updatedOrder = action.payload.order || action.payload.data || action.payload;
+        if (updatedOrder && updatedOrder._id) {
+          const index = state.orders.findIndex(
+            (order) => order._id === updatedOrder._id
+          );
+          if (index !== -1) {
+            state.orders[index] = updatedOrder;
+          }
         }
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = typeof action.payload === 'string'
+          ? action.payload
+          : action.payload?.message || action.payload?.error || "Failed to update order status";
       })
 
       // 🗑️ Delete Order
@@ -129,7 +146,9 @@ const adminOrderSlice = createSlice({
       })
       .addCase(deleteOrder.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = typeof action.payload === 'string'
+          ? action.payload
+          : action.payload?.message || action.payload?.error || "Failed to delete order";
       });
   },
 });

@@ -1,11 +1,23 @@
-import { FaBoxOpen, FaClipboardList, FaSignOutAlt, FaStore, FaUser } from "react-icons/fa";
+import {
+  FaBoxOpen,
+  FaClipboardList,
+  FaSignOutAlt,
+  FaStore,
+  FaUser,
+} from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/slices/authSlice";
+import { clearCart } from "../../redux/slices/cartSlice";
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ onLinkClick }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    navigate("/");
+    dispatch(logout());
+    dispatch(clearCart());
+    navigate("/login");
   };
 
   return (
@@ -15,6 +27,7 @@ const AdminSidebar = () => {
         <Link
           id="logo"
           to="/admin"
+          onClick={onLinkClick}
           className="text-3xl font-extrabold text-[#D42935] tracking-wide"
         >
           Rare Rabbit
@@ -27,7 +40,7 @@ const AdminSidebar = () => {
       </h2>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-3 flex-grow">
+      <nav className="flex flex-col gap-3">
         {[
           { to: "/admin", icon: <FaClipboardList />, label: "Dashboard" },
           { to: "/admin/users", icon: <FaUser />, label: "Users" },
@@ -39,6 +52,7 @@ const AdminSidebar = () => {
             key={to}
             to={to}
             end
+            onClick={onLinkClick}
             className={({ isActive }) =>
               `flex items-center gap-3 p-3 rounded-lg transition font-medium ${
                 isActive
@@ -51,18 +65,15 @@ const AdminSidebar = () => {
             <span>{label}</span>
           </NavLink>
         ))}
-      </nav>
 
-      {/* Logout Button */}
-      <div className="mt-8">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition py-3 rounded-lg font-semibold text-white shadow-md"
+          className="flex items-center gap-3 p-3 rounded-lg transition font-medium border-2 text-gray-400 hover:bg-red-600 hover:text-white mt-2"
         >
           <FaSignOutAlt />
           <span>Logout</span>
         </button>
-      </div>
+      </nav>
     </div>
   );
 };

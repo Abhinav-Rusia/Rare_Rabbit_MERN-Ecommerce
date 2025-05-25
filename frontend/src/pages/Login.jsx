@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import login from "../assets/login.webp";
+import { toast } from "sonner";
 
 import { loginUser } from "../redux/slices/authSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { mergeCart } from "../redux/slices/cartSlice";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +14,41 @@ const Login = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, guestId, loading, error } = useSelector((state) => state.auth);
+  const { cart } = useSelector((state) => state.cart);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // get redirect parameter and check if its checkout or something else
+
+  const redirect = new URLSearchParams(location.search).get("redirect") || "/";
+  const isCheckoutRedirect = redirect.includes("checkout");
+
+  // Handle successful login and error messages
+  useEffect(() => {
+    if (user) {
+      toast.success("Login successful!");
+      if (cart?.products.length > 0 && guestId) {
+        dispatch(mergeCart({ userId: user._id, guestId })).then(() => {
+          navigate(isCheckoutRedirect ? "/checkout" : "/");
+        });
+      } else {
+        navigate(isCheckoutRedirect ? "/checkout" : "/");
+      }
+    }
+
+    if (error) {
+      if (error.includes("not verified")) {
+        toast.error("Your email is not verified. Please check your email for verification code.");
+        // Redirect to verification page with email
+        navigate("/verify-email", { state: { email } });
+      } else {
+        toast.error(error || "Login failed. Please check your credentials.");
+      }
+      setIsSubmitting(false);
+    }
+  }, [user, cart, guestId, error, isCheckoutRedirect, navigate, dispatch, email]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -21,7 +58,13 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    dispatch(loginUser({ email, password }))
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+
+    setIsSubmitting(true);
+    dispatch(loginUser({ email, password }));
   };
 
   return (
@@ -86,16 +129,17 @@ const Login = () => {
           {/* Submit Button */}
           <button
             type="submit"
+            disabled={isSubmitting || loading}
             className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition mt-4"
           >
-            Sign In
+            {isSubmitting || loading ? "Signing In..." : "Sign In"}
           </button>
 
           {/* Link to Register */}
           <p className="mt-6 text-center text-sm">
             Don't have an account?{" "}
             <Link
-              to="/register"
+              to={`/register?redirect=${encodeURIComponent(redirect)}`}
               className="text-[#D42935] font-semibold underline"
             >
               Register

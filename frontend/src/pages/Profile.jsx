@@ -1,7 +1,28 @@
 import { useEffect } from "react";
 import MyOrdersPage from "./MyOrdersPage";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../redux/slices/authSlice";
+import { clearCart } from "../redux/slices/cartSlice";
 
 const Profile = () => {
+
+  const {user} = useSelector((state) => state.auth);
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    if(!user){
+      navigate("/login")
+    }
+  },[user,navigate])
+
+  const handleLogout = () => {
+    dispatch(logout())
+    dispatch(clearCart())
+    navigate("/login")
+  }
+
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -15,8 +36,9 @@ const Profile = () => {
             <h1 className="text-2xl md:text-3xl font-bold mb-4">
               Your Profile
             </h1>
-            <p className="text-lg text-gray-600 mb-4">email@email.com</p>
-            <button className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 cursor-pointer transition">
+            <p className="text-lg text-gray-600 mb-4">Name: {user?.name}</p>
+            <p className="text-lg text-gray-600 mb-4">Email: {user?.email}</p>
+            <button onClick={handleLogout} className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 cursor-pointer transition">
               Logout
             </button>
           </div>

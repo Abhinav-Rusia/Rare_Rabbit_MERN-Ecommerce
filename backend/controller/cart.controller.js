@@ -218,13 +218,22 @@ export const displayCart = async (req, res) => {
     const { guestId, userId } = req.query;
 
     try {
-
         let cart = await getCart(userId, guestId);
 
+        // If no cart exists, return an empty cart instead of 404
         if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: "Cart not found",
+            // Create an empty cart structure to return
+            const emptyCart = {
+                user: userId || undefined,
+                guestId: guestId || undefined,
+                products: [],
+                totalPrice: 0
+            };
+
+            return res.status(200).json({
+                success: true,
+                message: "Empty cart returned",
+                cart: emptyCart,
             });
         }
 
@@ -232,15 +241,13 @@ export const displayCart = async (req, res) => {
             success: true,
             message: "Cart fetched successfully",
             cart,
-        })
+        });
 
     } catch (error) {
-
         return res.status(500).json({
             success: false,
             message: "Server error: " + error.message,
         });
-
     }
 }
 

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import PriceDisplay from "../Common/PriceDisplay";
 
 const ProductGrid = ({ products, loading, error }) => {
 
@@ -58,12 +59,16 @@ const ProductGrid = ({ products, loading, error }) => {
                 className="w-full h-full object-cover rounded-lg "
               />
             </div>
-            <h3 className="text-sm mb-2">
+            <h3 className="text-sm mb-2 font-medium text-gray-800">
                 {product.name}
             </h3>
-            <p className="text-gray-500 font-medium text-sm tracking-tighter">
-                Rs. {product.price}
-            </p>
+            <PriceDisplay
+              price={product.price}
+              discountPrice={product.discountPrice}
+              size="small"
+              showBadge={true}
+              showSavings={false}
+            />
           </div>
         </Link>
       ))}

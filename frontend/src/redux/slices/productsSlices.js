@@ -37,7 +37,6 @@ export const fetchProductsByFilters = createAsyncThunk(
     // Only add limit parameter if it's defined and not null or undefined
     // Only add limit parameter if it's explicitly provided and is a positive number
     if (limit !== undefined && limit !== null && limit !== '' && Number(limit) > 0) {
-      console.log(`Adding limit parameter: ${limit}`);
       query.append("limit", limit);
     }
 
@@ -140,8 +139,6 @@ const productSlice = createSlice({
       .addCase(fetchProductsByFilters.fulfilled, (state, action) => {
         state.loading = false;
 
-        console.log("API Response:", action.payload);
-
         // Check if the response has the expected structure and extract products
         if (action.payload && action.payload.products) {
           // Handle the case where products might be an array of documents from MongoDB aggregation
@@ -153,12 +150,10 @@ const productSlice = createSlice({
             return product;
           });
 
-          console.log(`Loaded ${products.length} products`);
           state.products = products;
         } else {
           // Fallback for unexpected response format
           const fallbackProducts = Array.isArray(action.payload) ? action.payload : [];
-          console.log(`Loaded ${fallbackProducts.length} products (fallback)`);
           state.products = fallbackProducts;
         }
       })

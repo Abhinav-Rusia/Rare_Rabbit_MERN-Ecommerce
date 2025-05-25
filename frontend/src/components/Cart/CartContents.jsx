@@ -2,6 +2,7 @@ import React from "react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useDispatch } from "react-redux";
 import { updateCartItemQuantity, removeFromCart } from "../../redux/slices/cartSlice";
+import PriceDisplay from "../Common/PriceDisplay";
 
 const CartContents = ({ cart, userId, guestId }) => {
   const dispatch = useDispatch();
@@ -91,8 +92,14 @@ const CartContents = ({ cart, userId, guestId }) => {
               </div>
             </div>
           </div>
-          <div className="">
-            <p>₹{product.price.toLocaleString()}</p>
+          <div className="text-right">
+            <PriceDisplay
+              price={product.originalPrice || product.price}
+              discountPrice={product.discountPrice || (product.originalPrice ? product.price : null)}
+              size="small"
+              showBadge={false}
+              showSavings={false}
+            />
             <button
               onClick={() =>
                 handleRemoveFromCart(

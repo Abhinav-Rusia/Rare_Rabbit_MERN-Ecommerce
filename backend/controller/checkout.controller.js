@@ -1,6 +1,9 @@
 import Checkout from "../models/checkout.model.js";
 import Cart from "../models/cart.model.js";
 import Order from "../models/order.model.js";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 
 export const createCheckoutSession = async (req, res) => {
@@ -78,6 +81,39 @@ export const updateCheckoutSession = async (req, res) => {
 
 }
 
+export const createStripePaymentIntent = async (req, res) => {
+    try {
+        const { checkoutId } = req.params;
+
+        const checkout = await Checkout.findById(checkoutId);
+
+        if (!checkout) {
+            return res.status(404).json({ success: false, message: "Checkout session not found" });
+        }
+
+        // Create payment intent with Stripe
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(checkout.totalPrice * 100), // Convert to cents
+            currency: 'inr', // Indian Rupees
+            metadata: {
+                checkoutId: checkout._id.toString(),
+                userId: checkout.user.toString()
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            clientSecret: paymentIntent.client_secret
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error: " + error.message
+        });
+    }
+}
+
 export const finalizeSession = async (req, res) => {
     try {
 
@@ -87,8 +123,11 @@ export const finalizeSession = async (req, res) => {
             return res.status(404).json({ success: false, message: "Checkout session not found" });
         }
 
-        if (checkout.isPaid && !checkout.isFinalized) {
+        if (!checkout.isFinalized) {
             // Create final order based on checkout details
+            // For COD, we create the order even if not paid yet
+            const isPaidOrder = checkout.isPaid || checkout.paymentMethod === "cod";
+            const paymentStatusOrder = checkout.isPaid ? "paid" : (checkout.paymentMethod === "cod" ? "pending" : "pending");
 
             const finalOrder = await Order.create({
                 user: checkout.user,
@@ -96,12 +135,13 @@ export const finalizeSession = async (req, res) => {
                 shippingAddress: checkout.shippingAddress,
                 paymentMethod: checkout.paymentMethod,
                 totalPrice: checkout.totalPrice,
-                isPaid: true,
-                paidAt: checkout.paidAt,
+                isPaid: isPaidOrder,
+                paidAt: checkout.paidAt || (checkout.paymentMethod === "cod" ? new Date() : undefined),
                 isDelivered: false,
-                paymentStatus: "paid",
+                paymentStatus: paymentStatusOrder,
                 paymentDetails: checkout.paymentDetails,
             })
+
             // mark the checkout as finalized
             checkout.isFinalized = true;
             checkout.finalizedAt = Date.now();
@@ -112,11 +152,8 @@ export const finalizeSession = async (req, res) => {
 
             return res.status(200).json({ success: true, message: "Order created successfully", order: finalOrder });
         }
-        else if (checkout.isFinalized) {
-            return res.status(400).json({ success: false, message: "Order already finalized" });
-        }
         else {
-            return res.status(400).json({ success: false, message: "Order not paid yet" });
+            return res.status(400).json({ success: false, message: "Order already finalized" });
         }
 
     } catch (error) {

@@ -1,86 +1,70 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserOrders } from "../redux/slices/orderSlice";
 
 const MyOrdersPage = () => {
-  const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { orders, loading, error } = useSelector((state) => state.orders);
+
+  useEffect(() => {
+    dispatch(fetchUserOrders());
+  }, [dispatch]);
 
   const handleRowClick = (orderId) => {
     navigate(`/order/${orderId}`);
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      const mockOrders = [
-        {
-          _id: "d6f6g8i9",
-          createdAt: new Date("2024-06-17T10:00:00Z"),
-          shippingAddress: {
-            city: "Indore",
-            country: "India",
-          },
-          orderItems: [
-            {
-              name: "Product1",
-              image: "https://picsum.photos/500/500?random=200",
-            },
-          ],
-          totalPrice: 2489,
-          isPaid: true,
-        },
-        {
-          _id: "a1b2c3d4",
-          createdAt: new Date("2023-10-01T10:00:00Z"),
-          shippingAddress: {
-            city: "Mumbai",
-            country: "India",
-          },
-          orderItems: [
-            {
-              name: "Wireless Headphones",
-              image: "https://picsum.photos/500/500?random=201",
-            },
-          ],
-          totalPrice: 3499,
-          isPaid: false,
-        },
-        {
-          _id: "e5f6g7h8",
-          createdAt: new Date("2023-11-15T15:30:00Z"),
-          shippingAddress: {
-            city: "Delhi",
-            country: "India",
-          },
-          orderItems: [
-            {
-              name: "Smartwatch Pro",
-              image: "https://picsum.photos/500/500?random=202",
-            },
-          ],
-          totalPrice: 7999,
-          isPaid: true,
-        },
-        {
-          _id: "i9j0k1l2",
-          createdAt: new Date("2024-01-05T09:45:00Z"),
-          shippingAddress: {
-            city: "Bangalore",
-            country: "India",
-          },
-          orderItems: [
-            {
-              name: "Bluetooth Speaker",
-              image: "https://picsum.photos/500/500?random=203",
-            },
-          ],
-          totalPrice: 2299,
-          isPaid: false,
-        },
-      ];
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        {/* Classic spinner */}
+        <svg
+          className="animate-spin h-10 w-10 text-gray-900 hidden md:block"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4.93 4.93a10 10 0 0114.14 14.14l1.41 1.41a12 12 0 00-16.97-16.97l1.41 1.41z"
+          ></path>
+        </svg>
+        <div className="flex flex-col items-center md:hidden">
+          <div className="flex space-x-2 mb-3">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-3 h-3 rounded-full bg-indigo-600 animate-bounce`}
+                style={{ animationDelay: `${i * 0.15}s` }}
+              ></div>
+            ))}
+          </div>
+          <p className="text-sm font-medium text-gray-600 animate-pulse">
+            loading your vibe...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-      setOrders(mockOrders);
-    }, 1000);
-  }, []);
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-red-500 text-lg">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -136,12 +120,18 @@ const MyOrdersPage = () => {
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        order.isPaid
+                        order.paymentMethod === "cod"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : order.isPaid
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {order.isPaid ? "Paid" : "Pending"}
+                      {order.paymentMethod === "cod"
+                        ? "Pending (COD)"
+                        : order.isPaid
+                        ? "Paid"
+                        : "Pending"}
                     </span>
                   </td>
                 </tr>

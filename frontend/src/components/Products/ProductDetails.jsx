@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import ProductGrid from "./ProductGrid";
+import PriceDisplay from "../Common/PriceDisplay";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -183,16 +184,19 @@ const ProductDetails = ({ productId }) => {
 
           {/* Right side */}
           <div className="md:w-1/2 md:ml-10">
-            <h1 className="text-2xl md:text-3xl font-semibold mb-2">
+            <h1 className="text-2xl md:text-3xl font-semibold mb-4">
               {selectedProduct.name}
             </h1>
-            <p className="text-lg mb-1 line-through text-gray-600">
-              {selectedProduct.originalPrice &&
-                `Rs.${selectedProduct.originalPrice}`}
-            </p>
-            <p className="text-xl font-semibold mb-3 text-gray-900">
-              Rs.{selectedProduct.price}
-            </p>
+
+            <div className="mb-6">
+              <PriceDisplay
+                price={selectedProduct.price}
+                discountPrice={selectedProduct.discountPrice}
+                size="large"
+                showBadge={true}
+                showSavings={true}
+              />
+            </div>
 
             {selectedProduct.description || selectedProduct.Description ? (
               <p className="text-gray-600 mb-4">

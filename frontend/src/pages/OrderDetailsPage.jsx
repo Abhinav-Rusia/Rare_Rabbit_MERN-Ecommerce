@@ -1,54 +1,74 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
+import { fetchOrderDetails } from "../redux/slices/orderSlice";
+import { useSelector } from "react-redux";
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
-  const [orderDetails, setOrderDetails] = useState(null);
+  const dispatch = useDispatch()
+  const { orderDetails, loading, error } = useSelector((state) => state.orders);
 
   useEffect(() => {
-    const mockOrderDetails = {
-      _id:"r4dfa2awf45z8w",
-      createdAt: new Date(),
-      isPaid: true,
-      isDelivered: false,
-      paymentMethod: "Paypal",
-      shippingMethod: "Standard",
-      shippingAddress: {
-        name: "John Doe",
-        address: "123 Main St",
-        city: "Anytown",
-        country: "USA",
-        postalCode: "12345",
-      },
-      orderItems: [
-        {
-          productId: 1,
-          name: "Product 1",
-          price: 1000,
-          quantity: 2,
-          image: "https://picsum.photos/500?random=1",
-          color: "Red",
-          size: "L",
-        },
-        {
-          productId: 2,
-          name: "Product 2",
-          price: 1258,
-          quantity: 3,
-          image: "https://picsum.photos/500?random=2",
-          color: "Blue",
-          size: "XL",
-        },
-      ],
-      totalPrice: 2558,
-    };
+    dispatch(fetchOrderDetails(id));
+  }, [dispatch, id]);
 
-    setOrderDetails(mockOrderDetails);
-  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        {/* Classic spinner */}
+        <svg
+          className="animate-spin h-10 w-10 text-gray-900 hidden md:block"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4.93 4.93a10 10 0 0114.14 14.14l1.41 1.41a12 12 0 00-16.97-16.97l1.41 1.41z"
+          ></path>
+        </svg>
+        <div className="flex flex-col items-center md:hidden">
+          <div className="flex space-x-2 mb-3">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-3 h-3 rounded-full bg-indigo-600 animate-bounce`}
+                style={{ animationDelay: `${i * 0.15}s` }}
+              ></div>
+            ))}
+          </div>
+          <p className="text-sm font-medium text-gray-600 animate-pulse">
+            loading your vibe...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-red-500 text-lg">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-8">Order Details</h2>
+      <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-8">
+        Order Details
+      </h2>
 
       {!orderDetails ? (
         <p className="text-gray-500 mb-4 text-lg">No order details found.</p>
@@ -58,11 +78,12 @@ const OrderDetailsPage = () => {
           <div className="flex flex-col md:flex-row justify-between mb-10">
             <div>
               <h3 className="text-xl md:text-2xl font-bold text-gray-800">
-                Order ID : <span className="text-indigo-600">#{orderDetails._id}</span>
+                Order ID :{" "}
+                <span className="text-indigo-600">#{orderDetails._id}</span>
               </h3>
               <p className="text-gray-500 mt-2 text-sm">
                 Placed on:{" "}
-                {orderDetails.createdAt.toLocaleDateString("en-US", {
+                {new Date(orderDetails.createdAt).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "short",
                   day: "numeric",
@@ -72,12 +93,18 @@ const OrderDetailsPage = () => {
             <div className="flex flex-col items-start sm:items-end mt-6 sm:mt-0 gap-2">
               <span
                 className={`text-sm font-medium px-3 py-1 rounded-full ${
-                  orderDetails.isPaid
+                  orderDetails.paymentMethod === "cod"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : orderDetails.isPaid
                     ? "bg-green-100 text-green-700"
                     : "bg-red-100 text-red-700"
                 }`}
               >
-                {orderDetails.isPaid ? "Payment Approved" : "Payment Pending"}
+                {orderDetails.paymentMethod === "cod"
+                  ? "Payment Pending"
+                  : orderDetails.isPaid
+                  ? "Payment Approved"
+                  : "Payment Pending"}
               </span>
 
               <span
@@ -95,19 +122,30 @@ const OrderDetailsPage = () => {
           {/* Customer, payment, shipping Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-10">
             <div>
-              <h4 className="text-lg font-semibold text-gray-700 mb-3">Payment Info</h4>
+              <h4 className="text-lg font-semibold text-gray-700 mb-3">
+                Payment Info
+              </h4>
               <p className="text-gray-600 text-sm mb-1">
-                <span className="font-semibold">Method:</span> {orderDetails.paymentMethod}
+                <span className="font-semibold">Method:</span>{" "}
+                {orderDetails.paymentMethod.toUpperCase()}
               </p>
               <p className="text-gray-600 text-sm">
-                <span className="font-semibold">Status:</span> {orderDetails.isPaid ? "Paid" : "Pending"}
+                <span className="font-semibold">Status:</span>{" "}
+                {orderDetails.paymentMethod === "cod"
+                  ? "Pending"
+                  : orderDetails.isPaid
+                    ? "Paid"
+                    : "Pending"}
               </p>
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold text-gray-700 mb-3">Shipping Info</h4>
+              <h4 className="text-lg font-semibold text-gray-700 mb-3">
+                Shipping Info
+              </h4>
               <p className="text-gray-600 text-sm mb-1">
-                <span className="font-semibold">Method:</span> {orderDetails.shippingMethod}
+                <span className="font-semibold">Method:</span>{" "}
+                {orderDetails.shippingMethod}
               </p>
               <p className="text-gray-600 text-sm">
                 <span className="font-semibold">Address:</span>{" "}
@@ -118,7 +156,9 @@ const OrderDetailsPage = () => {
 
           {/* Product List */}
           <div className="overflow-x-auto mb-8">
-            <h4 className="text-lg font-semibold text-gray-700 mb-4">Products</h4>
+            <h4 className="text-lg font-semibold text-gray-700 mb-4">
+              Products
+            </h4>
             <table className="min-w-full text-gray-700 bg-white shadow-sm rounded-lg overflow-hidden">
               <thead className="bg-gray-100 text-sm">
                 <tr>
@@ -131,7 +171,10 @@ const OrderDetailsPage = () => {
 
               <tbody>
                 {orderDetails.orderItems.map((item) => (
-                  <tr key={item.productId} className="border-b last:border-none hover:bg-gray-50 transition">
+                  <tr
+                    key={item.productId}
+                    className="border-b last:border-none hover:bg-gray-50 transition"
+                  >
                     <td className="py-4 px-5 flex items-center gap-4">
                       <img
                         src={item.image}
@@ -147,7 +190,9 @@ const OrderDetailsPage = () => {
                     </td>
                     <td className="py-4 px-5 text-sm">Rs.{item.price}</td>
                     <td className="py-4 px-5 text-sm">{item.quantity}</td>
-                    <td className="py-4 px-5 text-sm font-semibold">Rs.{item.price * item.quantity}</td>
+                    <td className="py-4 px-5 text-sm font-semibold">
+                      Rs.{item.price * item.quantity}
+                    </td>
                   </tr>
                 ))}
               </tbody>

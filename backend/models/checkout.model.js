@@ -21,6 +21,14 @@ const checkoutItemSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         required: true
+    },
+    size: {
+        type: String,
+        required: true
+    },
+    color: {
+        type: String,
+        required: true
     }
 }
     , { _id: false }
@@ -33,6 +41,14 @@ const checkoutSchema = new mongoose.Schema({
     },
     checkoutItems: [checkoutItemSchema],
     shippingAddress: {
+        firstName: {
+            type: String,
+            required: true
+        },
+        lastName: {
+            type: String,
+            required: true
+        },
         address: {
             type: String,
             required: true
@@ -41,11 +57,19 @@ const checkoutSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        state: {
+            type: String,
+            required: true
+        },
         postalCode: {
             type: String,
             required: true
         },
         country: {
+            type: String,
+            required: true
+        },
+        phone: {
             type: String,
             required: true
         }

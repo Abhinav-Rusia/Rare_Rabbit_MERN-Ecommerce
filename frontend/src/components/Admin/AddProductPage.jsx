@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchAdminProductDetails,
-  updateProduct,
+  createProduct,
   uploadProductImages,
   clearUploadedImages,
   removeUploadedImage,
@@ -11,12 +10,11 @@ import {
 } from "../../redux/slices/adminProductSlice";
 import { toast } from "sonner";
 
-const EditProductPage = () => {
-  const { id } = useParams();
+const AddProductPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { productDetails, uploadedImages, loading, uploadLoading, error } = useSelector(
+  const { uploadedImages, loading, uploadLoading, error } = useSelector(
     (state) => state.adminProducts
   );
 
@@ -34,13 +32,13 @@ const EditProductPage = () => {
     colors: [],
     images: [],
     isFeatured: false,
-    isPublished: false,
+    isPublished: true, // Default to published for new products
     tags: [],
   });
 
   const [dragActive, setDragActive] = useState(false);
 
-  // Local state for array inputs to avoid re-render issues
+  // Local state for array inputs
   const [sizesInput, setSizesInput] = useState("");
   const [colorsInput, setColorsInput] = useState("");
   const [tagsInput, setTagsInput] = useState("");
@@ -63,9 +61,7 @@ const EditProductPage = () => {
     "Casual Wear",
     "Formal Wear",
     "Sports Collection",
-    "Premium Collection",
-    "Accessories Collection",
-
+    "Premium Collection"
   ];
 
   const genderOptions = [
@@ -75,48 +71,13 @@ const EditProductPage = () => {
     "kids"
   ];
 
-  // Load product data on component mount
+  // Clear uploaded images when component unmounts
   useEffect(() => {
-    if (id) {
-      dispatch(fetchAdminProductDetails(id));
-    }
     return () => {
-      dispatch(clearError());
       dispatch(clearUploadedImages());
+      dispatch(clearError());
     };
-  }, [dispatch, id]);
-
-  // Update form data when product details are loaded
-  useEffect(() => {
-    if (productDetails) {
-      const sizes = Array.isArray(productDetails.sizes) ? productDetails.sizes : [];
-      const colors = Array.isArray(productDetails.colors) ? productDetails.colors : [];
-      const tags = Array.isArray(productDetails.tags) ? productDetails.tags : [];
-
-      setProductData({
-        name: productDetails.name || "",
-        description: productDetails.description || "",
-        price: productDetails.price || 0,
-        discountPrice: productDetails.discountPrice || 0,
-        sku: productDetails.sku || "",
-        category: productDetails.category || "",
-        collections: productDetails.collections || "",
-        gender: productDetails.gender || "",
-        countInStock: productDetails.countInStock || 0,
-        sizes: sizes,
-        colors: colors,
-        images: productDetails.images || [],
-        isFeatured: productDetails.isFeatured || false,
-        isPublished: productDetails.isPublished || false,
-        tags: tags,
-      });
-
-      // Update local input states
-      setSizesInput(sizes.join(", "));
-      setColorsInput(colors.join(", "));
-      setTagsInput(tags.join(", "));
-    }
-  }, [productDetails]);
+  }, [dispatch]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -198,32 +159,55 @@ const EditProductPage = () => {
     }
   };
 
-  const removeImage = (index, isUploaded = false) => {
-    if (isUploaded) {
-      // Remove from uploaded images using Redux action
-      dispatch(removeUploadedImage(index));
-    } else {
-      // Remove from existing product images
-      const newImages = [...productData.images];
-      newImages.splice(index, 1);
-      setProductData(prev => ({ ...prev, images: newImages }));
-    }
+  const removeUploadedImage = (index) => {
+    dispatch(removeUploadedImage(index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      // Combine existing images with newly uploaded ones
-      const allImages = [
-        ...productData.images,
-        ...uploadedImages.map(img => ({
-          url: img.url || img.imageUrl || img,
-          altText: img.altText || ""
-        }))
-      ];
+    // Basic validation
+    if (!productData.name.trim()) {
+      toast.error("Product name is required");
+      return;
+    }
+    if (!productData.description.trim()) {
+      toast.error("Product description is required");
+      return;
+    }
+    if (!productData.sku.trim()) {
+      toast.error("SKU is required");
+      return;
+    }
+    if (!productData.category) {
+      toast.error("Please select a category");
+      return;
+    }
+    if (!productData.collections) {
+      toast.error("Please select a collection");
+      return;
+    }
+    if (!productData.gender) {
+      toast.error("Please select a gender");
+      return;
+    }
+    if (productData.price <= 0) {
+      toast.error("Price must be greater than 0");
+      return;
+    }
+    if (productData.countInStock < 0) {
+      toast.error("Stock quantity cannot be negative");
+      return;
+    }
 
-      const updatedProductData = {
+    try {
+      // Include uploaded images in product data
+      const allImages = uploadedImages.map(img => ({
+        url: img.url || img.imageUrl || img,
+        altText: img.altText || ""
+      }));
+
+      const newProductData = {
         ...productData,
         images: allImages,
         price: Number(productData.price),
@@ -231,46 +215,20 @@ const EditProductPage = () => {
         countInStock: Number(productData.countInStock),
       };
 
-      await dispatch(updateProduct({ id, productData: updatedProductData })).unwrap();
-      toast.success("Product updated successfully!");
+      await dispatch(createProduct(newProductData)).unwrap();
+      toast.success("Product created successfully!");
       navigate("/admin/products");
     } catch (error) {
-      toast.error("Failed to update product");
+      toast.error("Failed to create product");
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-md w-full text-center border border-gray-100">
-          <div className="relative mb-8">
-            <div className="w-20 h-20 mx-auto relative">
-              <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-purple-500 animate-spin"></div>
-              <div className="absolute inset-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-            Loading Product
-          </h3>
-          <p className="text-gray-500 text-sm mt-2">
-            Please wait while we fetch the product details...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-          Edit Product
+        <h2 className="text-4xl font-extrabold bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+          Add New Product
         </h2>
         <button
           onClick={() => navigate("/admin/products")}
@@ -597,35 +555,13 @@ const EditProductPage = () => {
             </div>
           </div>
 
-          {/* Current Images */}
-          {(productData.images.length > 0 || uploadedImages.length > 0) && (
+          {/* Uploaded Images Preview */}
+          {uploadedImages.length > 0 && (
             <div className="mt-6">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">Current Images</h4>
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Uploaded Images</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {/* Existing Images */}
-                {productData.images.map((img, index) => (
-                  <div key={`existing-${index}`} className="relative group">
-                    <img
-                      src={img.url}
-                      alt={img.altText || "Product"}
-                      className="w-full h-24 object-cover rounded-lg border border-gray-200 shadow-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index, false)}
-                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      ×
-                    </button>
-                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                      Current
-                    </div>
-                  </div>
-                ))}
-
-                {/* Newly Uploaded Images */}
                 {uploadedImages.map((img, index) => (
-                  <div key={`uploaded-${index}`} className="relative group">
+                  <div key={index} className="relative group">
                     <img
                       src={img.url || img}
                       alt="Uploaded"
@@ -633,7 +569,7 @@ const EditProductPage = () => {
                     />
                     <button
                       type="button"
-                      onClick={() => removeImage(index, true)}
+                      onClick={() => removeUploadedImage(index)}
                       className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       ×
@@ -703,15 +639,15 @@ const EditProductPage = () => {
           <button
             type="submit"
             disabled={loading || uploadLoading}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:transform-none disabled:shadow-none"
+            className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:transform-none disabled:shadow-none"
           >
             {loading || uploadLoading ? (
               <div className="flex items-center justify-center space-x-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Updating...</span>
+                <span>Creating...</span>
               </div>
             ) : (
-              "Update Product"
+              "Create Product"
             )}
           </button>
         </div>
@@ -720,4 +656,4 @@ const EditProductPage = () => {
   );
 };
 
-export default EditProductPage;
+export default AddProductPage;

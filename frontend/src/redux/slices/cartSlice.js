@@ -26,13 +26,13 @@ export const fetchCart = createAsyncThunk(
             userId,
             guestId,
           },
+          withCredentials: true,
         }
       );
       return response.data;
     } catch (error) {
       console.log(error);
-
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -55,12 +55,18 @@ export const addToCart = createAsyncThunk(
           color,
           userId,
           guestId,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
       );
       return response.data;
     } catch (error) {
       console.log(error);
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -83,12 +89,18 @@ export const updateCartItemQuantity = createAsyncThunk(
           guestId,
           size,
           color,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
       );
       return response.data;
     } catch (error) {
       console.log(error);
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -109,12 +121,16 @@ export const removeFromCart = createAsyncThunk(
             size,
             color,
           },
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
       );
       return response.data;
     } catch (error) {
       console.log(error);
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
