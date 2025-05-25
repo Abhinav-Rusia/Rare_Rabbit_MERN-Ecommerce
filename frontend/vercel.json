@@ -21,17 +21,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_BACKEND_URL": "@backend_url",
-    "VITE_STRIPE_PUBLISHABLE_KEY": "@stripe_publishable_key",
-    "VITE_PAYPAL_CLIENT_ID": "@paypal_client_id"
-  },
-  "build": {
-    "env": {
-      "VITE_BACKEND_URL": "@backend_url",
-      "VITE_STRIPE_PUBLISHABLE_KEY": "@stripe_publishable_key", 
-      "VITE_PAYPAL_CLIENT_ID": "@paypal_client_id"
-    }
-  }
+  ]
 }
