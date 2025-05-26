@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 
 // Helper function to load cart from local storage
 
@@ -19,16 +19,12 @@ export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async ({ userId, guestId }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/cart`,
-        {
-          params: {
-            userId,
-            guestId,
-          },
-          withCredentials: true,
+      const response = await api.get('/api/cart', {
+        params: {
+          userId,
+          guestId,
         }
-      );
+      });
       return response.data;
     } catch (error) {
       console.log(error);
@@ -46,23 +42,14 @@ export const addToCart = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/cart`,
-        {
-          productId,
-          quantity,
-          size,
-          color,
-          userId,
-          guestId,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await api.post('/api/cart', {
+        productId,
+        quantity,
+        size,
+        color,
+        userId,
+        guestId,
+      });
       return response.data;
     } catch (error) {
       console.log(error);
@@ -80,23 +67,14 @@ export const updateCartItemQuantity = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/cart`,
-        {
-          productId,
-          quantity,
-          userId,
-          guestId,
-          size,
-          color,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await api.put('/api/cart', {
+        productId,
+        quantity,
+        userId,
+        guestId,
+        size,
+        color,
+      });
       return response.data;
     } catch (error) {
       console.log(error);
@@ -111,22 +89,15 @@ export const removeFromCart = createAsyncThunk(
   "cart/removeFromCart",
   async ({ productId, userId, guestId, size, color }, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/api/cart`,
-        {
-          data: {
-            productId,
-            userId,
-            guestId,
-            size,
-            color,
-          },
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
+      const response = await api.delete('/api/cart', {
+        data: {
+          productId,
+          userId,
+          guestId,
+          size,
+          color,
         }
-      );
+      });
       return response.data;
     } catch (error) {
       console.log(error);
@@ -141,19 +112,10 @@ export const mergeCart = createAsyncThunk(
   "cart/mergeCart",
   async ({ userId, guestId }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/cart/merge`,
-        {
-          userId,
-          guestId,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // ✅ Send the cookie
-        }
-      );
+      const response = await api.post('/api/cart/merge', {
+        userId,
+        guestId,
+      });
       return response.data;
     } catch (error) {
       console.log(error);

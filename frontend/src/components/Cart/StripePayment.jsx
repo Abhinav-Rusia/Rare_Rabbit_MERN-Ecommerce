@@ -6,7 +6,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -26,16 +26,7 @@ const CheckoutForm = ({ checkoutId, amount, onSuccess, onError }) => {
 
     try {
       // Create payment intent
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/create-payment-intent`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const { data } = await api.post(`/api/checkout/${checkoutId}/create-payment-intent`, {});
 
       const { clientSecret } = data;
 

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import api from "../../utils/axiosConfig";
 
 // Async thunk for fetching products by collection and optional filters
 
@@ -63,16 +64,7 @@ export const fetchProductDetails = createAsyncThunk(
 export const updateProductDetails = createAsyncThunk(
   "products/updateProductDetails",
   async ({ id, productData }) => {
-    const response = await axios.put(
-      `${import.meta.env.VITE_BACKEND_URL}/api/products/${id}`,
-      productData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true, // ✅ Send cookies
-      }
-    );
+    const response = await api.put(`/api/products/${id}`, productData);
     return response.data;
   }
 );

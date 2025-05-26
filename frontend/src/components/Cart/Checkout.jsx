@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PaypalButton from "./PaypalButton";
 import StripePayment from "./StripePayment";
 import PriceDisplay from "../Common/PriceDisplay";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 import { createCheckout } from "../../redux/slices/checkoutSlice";
 import { toast } from "sonner";
 
@@ -90,6 +90,8 @@ const Checkout = () => {
       if (createCheckout.fulfilled.match(resultAction)) {
         if (resultAction.payload && resultAction.payload.checkoutId) {
           setCheckoutId(resultAction.payload.checkoutId);
+          console.log(resultAction.payload);
+
           toast.success("Checkout created successfully! Please select a payment method");
         } else {
           toast.error("Checkout created but no ID returned. Please try again");
@@ -106,19 +108,10 @@ const Checkout = () => {
 
   const handlePaymentSuccess = async (details) => {
     try {
-      const res = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/pay`,
-        {
-          paymentStatus: "paid",
-          paymentDetails: details,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await api.put(`/api/checkout/${checkoutId}/pay`, {
+        paymentStatus: "paid",
+        paymentDetails: details,
+      });
       if (res.data && res.data.success) {
         await handleFinalizeCheckout(checkoutId, "paypal");
       }
@@ -129,16 +122,7 @@ const Checkout = () => {
 
   const handleFinalizeCheckout = async (checkoutId, paymentMethod = "cod") => {
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/finalize`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await api.post(`/api/checkout/${checkoutId}/finalize`, {});
       if (res.data && res.data.success) {
         // Pass order data to order confirmation page
         navigate("/order-confirmation", {
@@ -163,19 +147,10 @@ const Checkout = () => {
   const handleStripePaymentSuccess = async (paymentIntent) => {
     try {
       // Update checkout with payment details
-      const res = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/pay`,
-        {
-          paymentStatus: "paid",
-          paymentDetails: paymentIntent,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await api.put(`/api/checkout/${checkoutId}/pay`, {
+        paymentStatus: "paid",
+        paymentDetails: paymentIntent,
+      });
 
       if (res.data && res.data.success) {
         await handleFinalizeCheckout(checkoutId, "stripe");

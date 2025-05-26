@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 
 // Async Thunk to fetch user orders
 
@@ -7,12 +7,7 @@ export const fetchUserOrders = createAsyncThunk(
   "orders/fetchUserOrders",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/orders/my-orders`,
-        {
-          withCredentials: true, // 👈 This ensures cookies (like auth token) are sent
-        }
-      );
+      const response = await api.get('/api/orders/my-orders');
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -28,12 +23,7 @@ export const fetchOrderDetails = createAsyncThunk(
   "orders/fetchOrderDetails",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/orders/${orderId}`,
-        {
-          withCredentials: true, // 👈 This ensures cookies (like auth token) are sent
-        }
-      );
+      const response = await api.get(`/api/orders/${orderId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -74,7 +64,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.orderDetails = action.payload.order;   
+        state.orderDetails = action.payload.order;
       })
       .addCase(fetchOrderDetails.rejected, (state, action) => {
         state.loading = false;

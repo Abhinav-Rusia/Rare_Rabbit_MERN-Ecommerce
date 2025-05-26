@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 
 // Async Thunk to create a checkout session
 
@@ -7,16 +7,7 @@ export const createCheckout = createAsyncThunk(
   "checkout/createCheckout",
   async (checkoutdata, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/checkout`,
-        checkoutdata,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // ✅ Needed to send cookie
-        }
-      );
+      const response = await api.post('/api/checkout', checkoutdata);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
