@@ -27,7 +27,6 @@ export const fetchCart = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -52,7 +51,6 @@ export const addToCart = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -77,7 +75,6 @@ export const updateCartItemQuantity = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -100,7 +97,6 @@ export const removeFromCart = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -118,7 +114,6 @@ export const mergeCart = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }

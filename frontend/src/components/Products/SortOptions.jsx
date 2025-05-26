@@ -15,8 +15,6 @@ const SortOptions = () => {
 
     // Update the URL with the new parameters
     setSearchParams(newParams);
-
-    console.log("Sorting by:", sortBy);
   };
 
   return (

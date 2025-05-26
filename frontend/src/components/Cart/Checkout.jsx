@@ -90,7 +90,6 @@ const Checkout = () => {
       if (createCheckout.fulfilled.match(resultAction)) {
         if (resultAction.payload && resultAction.payload.checkoutId) {
           setCheckoutId(resultAction.payload.checkoutId);
-          console.log(resultAction.payload);
 
           toast.success("Checkout created successfully! Please select a payment method");
         } else {

@@ -33,9 +33,6 @@ const CollectionPage = () => {
 
     // Dispatch the action to fetch products
     dispatch(fetchProductsByFilters(params));
-
-    // Log the params for debugging
-    console.log("Fetching products with params:", params);
   }, [dispatch, collection, searchParams]);
 
   const toggleSidebar = () => {
