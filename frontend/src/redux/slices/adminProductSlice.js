@@ -1,16 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
+import api from "../../utils/axiosConfig";
 
 // Fetch products
 export const fetchAdminProducts = createAsyncThunk(
   "adminProducts/fetchProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/admin/products`, {
-        withCredentials: true,
-      });
+      const response = await api.get('/api/admin/products');
       return response.data;
     } catch (error) {
       return rejectWithValue(

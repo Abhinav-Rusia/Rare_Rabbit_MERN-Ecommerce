@@ -1,15 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 
 // Fetch all users
 export const fetchAllUsers = createAsyncThunk(
   "admin/fetchAllUsers",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/users`,
-        { withCredentials: true }
-      );
+      const response = await api.get('/api/admin/users');
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -27,11 +24,7 @@ export const addUser = createAsyncThunk(
   "admin/addUser",
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/users`,
-        userData,
-        { withCredentials: true }
-      );
+      const response = await api.post('/api/admin/users', userData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -49,11 +42,7 @@ export const updateUser = createAsyncThunk(
   "admin/updateUser",
   async ({ id, name, email, role }, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/users/${id}`,
-        { name, email, role },
-        { withCredentials: true }
-      );
+      const response = await api.patch(`/api/admin/users/${id}`, { name, email, role });
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -72,11 +61,7 @@ export const updateUserRole = createAsyncThunk(
   async ({ id, role, name, email }, { rejectWithValue }) => {
     try {
       // Use the existing admin user update endpoint with all user data
-      const response = await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/users/${id}`,
-        { name, email, role },
-        { withCredentials: true }
-      );
+      const response = await api.patch(`/api/admin/users/${id}`, { name, email, role });
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -94,10 +79,7 @@ export const deleteUser = createAsyncThunk(
   "admin/deleteUser",
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/users/${id}`,
-        { withCredentials: true }
-      );
+      const response = await api.delete(`/api/admin/users/${id}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(

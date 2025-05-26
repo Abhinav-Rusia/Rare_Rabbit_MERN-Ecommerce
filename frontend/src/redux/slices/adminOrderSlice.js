@@ -1,16 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+import api from "../../utils/axiosConfig";
 
 // ✅ Fetch all orders
 export const fetchAllOrders = createAsyncThunk(
   "adminOrders/fetchAllOrders",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/admin/orders`, {
-        withCredentials: true,
-      });
+      const response = await api.get('/api/admin/orders');
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -28,13 +24,7 @@ export const updateOrderStatus = createAsyncThunk(
   "adminOrders/updateOrderStatus",
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(
-        `${API_URL}/api/admin/orders/${id}`,
-        { status },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await api.put(`/api/admin/orders/${id}`, { status });
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -52,9 +42,7 @@ export const deleteOrder = createAsyncThunk(
   "adminOrders/deleteOrder",
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/api/admin/orders/${id}`, {
-        withCredentials: true,
-      });
+      await api.delete(`/api/admin/orders/${id}`);
       return id; // Return the deleted order ID for local state removal
     } catch (error) {
       return rejectWithValue(
