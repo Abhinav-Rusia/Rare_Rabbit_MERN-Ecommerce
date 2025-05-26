@@ -12,6 +12,10 @@ import Checkout from "./components/Cart/Checkout";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
+import ContactUs from "./pages/ContactUs";
+import AboutUs from "./pages/AboutUs";
+import FAQs from "./pages/FAQs";
+import Features from "./pages/Features";
 import AdminLayout from "./components/Admin/AdminLayout";
 import AdminHomePage from "./pages/AdminHomePage";
 import UserManagement from "./components/Admin/UserManagement";
@@ -45,6 +49,10 @@ const App = () => {
           />
           <Route path="order/:id" element={<OrderDetailsPage />} />
           <Route path="my-orders" element={<MyOrdersPage />} />
+          <Route path="contact" element={<ContactUs />} />
+          <Route path="about" element={<AboutUs />} />
+          <Route path="faqs" element={<FAQs />} />
+          <Route path="features" element={<Features />} />
         </Route>
 
         {/* Admin Layout */}

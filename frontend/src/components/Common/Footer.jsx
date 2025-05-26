@@ -33,7 +33,8 @@ const Footer = () => {
                 Get updates on new arrivals, trends, and exclusive offers.
               </p>
               <p className="text-sm text-gray-500">
-                Sign up now & get <strong className="italic">10% off</strong> your first order.
+                Sign up now & get <strong className="italic">10% off</strong>{" "}
+                your first order.
               </p>
               <form className="flex items-center justify-center md:justify-start">
                 <input
@@ -54,16 +55,10 @@ const Footer = () => {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">🛍️ Shop</h3>
               <ul className="space-y-2 text-gray-600">
-                {["Men", "Women", "Kids", "Accessories"].map((item, i) => (
-                  <li key={i}>
-                    <Link
-                      to="#"
-                      className="hover:text-black transition-colors hover:underline underline-offset-4"
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                <li className="hover:underline hover:text-black"><Link to="/collections/all?gender=male">Men</Link></li>
+                <li className="hover:underline hover:text-black"><Link to="/collections/all?gender=female">Women</Link></li>
+                <li className="hover:underline hover:text-black"><Link to="/collections/all?gender=kids">Kids</Link></li>
+                <li className="hover:underline hover:text-black"><Link to="/collections/all?category=Accessories">Accessories</Link></li>
               </ul>
             </div>
 
@@ -71,16 +66,38 @@ const Footer = () => {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">🧾 Support</h3>
               <ul className="space-y-2 text-gray-600">
-                {["Contact Us", "About Us", "FAQs", "Features"].map((item, i) => (
-                  <li key={i}>
-                    <Link
-                      to="#"
-                      className="hover:text-black transition-colors hover:underline underline-offset-4"
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link
+                    to="/contact"
+                    className="hover:text-black transition-colors hover:underline underline-offset-4"
+                  >
+                    Contact Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/about"
+                    className="hover:text-black transition-colors hover:underline underline-offset-4"
+                  >
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/faqs"
+                    className="hover:text-black transition-colors hover:underline underline-offset-4"
+                  >
+                    FAQs
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/features"
+                    className="hover:text-black transition-colors hover:underline underline-offset-4"
+                  >
+                    Features
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -124,7 +141,8 @@ const Footer = () => {
           <div className="mt-12 border-t border-gray-200 pt-6">
             <p className="text-center text-sm text-gray-500">
               &copy; {new Date().getFullYear()}{" "}
-              <span className="font-semibold text-black">Abhinav Rusia</span>. All rights reserved.
+              <span className="font-semibold text-black">Abhinav Rusia</span>.
+              All rights reserved.
             </p>
           </div>
         </div>
