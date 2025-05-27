@@ -131,6 +131,28 @@ const cartSlice = createSlice({
       state.cart = { products: [] };
       localStorage.removeItem("cart");
     },
+    // Optimistic updates for better UX
+    updateCartItemOptimistic: (state, action) => {
+      const { productId, quantity, size, color } = action.payload;
+      if (state.cart && state.cart.products) {
+        const itemIndex = state.cart.products.findIndex(
+          item => item.productId === productId && item.size === size && item.color === color
+        );
+        if (itemIndex !== -1) {
+          state.cart.products[itemIndex].quantity = quantity;
+          saveCartToStorage(state.cart);
+        }
+      }
+    },
+    removeCartItemOptimistic: (state, action) => {
+      const { productId, size, color } = action.payload;
+      if (state.cart && state.cart.products) {
+        state.cart.products = state.cart.products.filter(
+          item => !(item.productId === productId && item.size === size && item.color === color)
+        );
+        saveCartToStorage(state.cart);
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -161,30 +183,26 @@ const cartSlice = createSlice({
         state.error = action.payload?.message || "Failed To Add To Cart";
       })
       .addCase(updateCartItemQuantity.pending, (state) => {
-        state.loading = true;
+        // Don't set global loading for individual item updates
         state.error = null;
       })
       .addCase(updateCartItemQuantity.fulfilled, (state, action) => {
-        state.loading = false;
         state.cart = action.payload.cart; // Make sure we're accessing the cart property
         saveCartToStorage(action.payload.cart);
       })
       .addCase(updateCartItemQuantity.rejected, (state, action) => {
-        state.loading = false;
         state.error =
           action.payload?.message || "Failed To Update Item Quantity";
       })
       .addCase(removeFromCart.pending, (state) => {
-        state.loading = true;
+        // Don't set global loading for individual item removal
         state.error = null;
       })
       .addCase(removeFromCart.fulfilled, (state, action) => {
-        state.loading = false;
         state.cart = action.payload.cart; // Make sure we're accessing the cart property
         saveCartToStorage(action.payload.cart);
       })
       .addCase(removeFromCart.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload?.message || "Failed To Remove Items";
       })
       .addCase(mergeCart.pending, (state) => {
@@ -204,5 +222,5 @@ const cartSlice = createSlice({
 });
 
 
-export const {clearCart} = cartSlice.actions;
+export const { clearCart, updateCartItemOptimistic, removeCartItemOptimistic } = cartSlice.actions;
 export default cartSlice.reducer
